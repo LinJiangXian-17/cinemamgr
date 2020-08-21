@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lanqiao.mapper.FilmMapper">
+    <resultMap id="baseResultMap" type="Film">
+        <id property="filmId" column="FILM_ID"/>
+        <result property="filmName" column="FILM_NAME"/>
+        <result property="type" column="TYPE"/>
+        <result property="hit" column="HIT"/>
+        <result property="upComing" column="UPCOMING"/>
+        <result property="time" column="TIME"/>
+        <result property="score" column="SCORE"/>
+        <result property="wish" column="WISH"/>
+        <result property="cover" column="COVER"/>
+        <result property="summary" column="SUMMARY"/>
+        <!--<result property="showtime" column="TIME"/>-->
+    </resultMap>
+
+    <!-- 查询正在热映 -->
+    <select id="selectAll" resultMap="baseResultMap" parameterType="Film">
+        select FILM_ID,FILM_NAME,SUMMARY,TYPE,TIME,SCORE,WISH,cover
+         from FILM
+         <where>
+             AND HIT is not null AND HIT='0'
+             <if test="f.filmName != null and f.filmName.trim().length()>0">
+                 <bind name="likeName" value="'%' + f.filmName + '%'"/>
+                 AND FILM_NAME like #{likeName}
+             </if>
+         </where>
+    </select>
+
+    <!-- 查询即将上映 -->
+    <select id="selectAllUpComing" resultMap="baseResultMap" parameterType="Film">
+        select FILM_ID,FILM_NAME,SUMMARY,TIME,TYPE,SCORE,WISH,COVER
+         from FILM
+         <where>
+             AND UPCOMING is not null AND UPCOMING='1'
+             <if test="f.filmName != null and f.filmName.trim().length()>0">
+                 <bind name="likeName" value="'%' + f.filmName + '%'"/>
+                 AND FILM_NAME like #{likeName}
+             </if>
+         </where>
+    </select>
+
+    <!-- 热播电影 -->
+    <select id="selectAllHit" resultMap="baseResultMap" parameterType="Film">
+        select FILM_ID,FILM_NAME,SUMMARY,TYPE,TIME,SCORE,WISH,COVER
+         from FILM
+         <where>
+             AND HIT is not null AND HIT='1'
+             <if test="f.filmName != null and f.filmName.trim().length()>0">
+                 <bind name="likeName" value="'%' + f.filmName + '%'"/>
+                 AND FILM_NAME like #{likeName}
+             </if>
+         </where>
+    </select>
+
+    <!-- select by id -->
+    <select id="selectById" resultMap="baseResultMap" parameterType="int">
+        select FILM_ID,FILM_NAME,SUMMARY,TYPE,TIME,SCORE,WISH,COVER,TIME
+         from FILM where FILM_ID = #{id}
+    </select>
+
+    <!-- update film info-->
+    <update id="updateFilm" parameterType="Film">
+        update FILM
+        <set>
+            <if test="filmName != null and filmName.trim().length()>0">FILM_NAME = #{filmName},</if>
+            <if test="summary != null and summary.trim().length()>0">SUMMARY = #{summary},</if>
+            <if test="type != null and type.trim().length()>0">TYPE=#{type},</if>
+            <if test="time != null">TIME=#{time},</if>
+            <if test="score != null">SCORE=#{score},</if>
+            <if test="wish != null">WISH=#{wish},</if>
+        </set>
+        where FILM_ID = #{filmId}
+    </update>
+
+    <!-- insert -->
+    <insert id="insertFilm" parameterType="Film">
+        insert into FILM(FILM_ID,FILM_NAME,SUMMARY,TYPE,HIT,UPCOMING,TIME,SCORE,WISH,COVER)
+         values(FILM_SEQ.nextval,
+         #{filmName,jdbcType=VARCHAR},
+         #{summary,jdbcType=VARCHAR},
+         #{type,jdbcType=VARCHAR},
+         #{hit,jdbcType=VARCHAR},
+         #{upComing,jdbcType=VARCHAR},
+         #{time,jdbcType=DATE},
+         #{score,jdbcType=DOUBLE},
+         #{wish,jdbcType=INTEGER},
+         #{cover,jdbcType=VARCHAR})
+    </insert>
+
+    <update id="updateToHit">
+        update FILM
+        <set>
+            <!-- 表示转成正在热映 -->
+            <if test="score != null ">SCORE=#{score},HIT='0',upComing='0',</if>
+            <if test="score == null ">HIT='1',</if>
+        </set>
+        where FILM_ID = #{filmId}
+    </update>
+</mapper>

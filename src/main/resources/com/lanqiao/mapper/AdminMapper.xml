@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lanqiao.mapper.AdminMapper">
+
+    <resultMap id="baseResultMap" type="Admin">
+        <id property="adminId" column="ADMIN_ID"/>
+        <result property="username" column="USERNAME"/>
+        <result property="password" column="PASSWORD"/>
+        <result property="email" column="EMAIL"/>
+        <result property="tel" column="TEL"/>
+    </resultMap>
+
+    <select id="selectForLogin" parameterType="Admin" resultMap="baseResultMap">
+        select ADMIN_ID,USERNAME,EMAIL,TEL
+          from CINEMA_ADMIN where USERNAME = #{username} and PASSWORD = #{password}
+    </select>
+</mapper>

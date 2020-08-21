@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lanqiao.mapper.ActorMapper">
+
+    <resultMap id="baseResultMap" type="Actor">
+        <id property="actorId" column="ACTOR_ID"/>
+        <result property="actorName" column="ACTOR_NAME"/>
+        <result property="description" column="DESCRIPTION"/>
+        <result property="actorImg" column="ACTOR_IMG"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="baseResultMap" parameterType="Actor">
+        select ACTOR_ID,ACTOR_NAME,DESCRIPTION,ACTOR_IMG from ACTOR
+        <where>
+            <if test="a.actorName != null and a.actorName.trim().length()>0">
+                <bind name="likeName" value="'%' + a.actorName + '%'"/>
+                AND ACTOR_NAME like #{likeName}
+            </if>
+        </where>
+    </select>
+
+    <select id="findWorkToAdd" resultMap="com.lanqiao.mapper.FilmMapper.baseResultMap" parameterType="int">
+        select f.FILM_ID,f.FILM_NAME from FILM f
+        where f.FILM_ID not in (select fa.FILM_ID from FILM_ACTOR fa where ACTOR_ID = #{id})
+    </select>
+
+    <insert id="insertWorkForActor">
+        insert into FILM_ACTOR(FILM_ID, ACTOR_ID) VALUES (#{filmId},#{actorId})
+    </insert>
+
+    <insert id="insertActor" parameterType="Actor">
+        insert into ACTOR(ACTOR_ID, ACTOR_NAME, ACTOR_IMG)
+        VALUES (ACTOR_SEQ.nextval,#{actorName,jdbcType=VARCHAR},#{actorImg,jdbcType=VARCHAR})
+    </insert>
+
+    <!-- 电影的演员 -->
+    <select id="selectActorsForFilm" parameterType="int" resultMap="baseResultMap">
+        select a.ACTOR_ID,a.ACTOR_NAME,a.ACTOR_IMG from ACTOR a where a.ACTOR_ID in (select fa.ACTOR_ID from FILM_ACTOR fa where fa.FILM_ID=#{id})
+    </select>
+</mapper>

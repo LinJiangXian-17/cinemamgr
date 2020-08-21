@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lanqiao.mapper.MovieAlbumMapper">
+
+    <resultMap id="baseResultMap" type="MovieAlbum">
+        <id property="id" column="ID"/>
+        <result property="imgUrl" column="IMG_URL"/>
+        <result property="filmId" column="FILM_ID"/>
+    </resultMap>
+
+    <insert id="insertImgagesForFilm">
+        insert into MOVIEALBUM(ID,FILM_ID ,IMG_URL )  values (MOVIEALBUM_SEQ.nextval,#{filmId},#{imgUrl})
+    </insert>
+
+    <select id="selectImages" parameterType="int" resultMap="baseResultMap">
+        select ID,FILM_ID,IMG_URL from MOVIEALBUM where FILM_ID = #{id}
+    </select>
+</mapper>

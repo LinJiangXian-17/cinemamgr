@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lanqiao.mapper.FigureMapper">
+
+    <resultMap id="baseResultMap" type="Figure">
+        <id property="figureId" column="FIGURE_ID" />
+        <result property="figurePrice" column="FIGURE_PRICE"/>
+        <result property="figureName" column="FIGURE_NAME"/>
+        <result property="figureImg" column="FIGURE_IMG"/>
+    </resultMap>
+
+    <select id="findAllFigure" resultMap="baseResultMap" parameterType="Figure">
+        select FIGURE_ID,FIGURE_NAME,FIGURE_IMG,FIGURE_PRICE from FIGURE
+        <where>
+            <if test="c.figureName != null and c.figureName.trim().length()>0">
+                <bind name="likeName" value="'%' + c.figureName + '%'"/>
+                AND FIGURE_NAME like #{likeName}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertFigure" parameterType="Figure">
+        insert into FIGURE(FIGURE_ID, FIGURE_PRICE, FIGURE_NAME, FIGURE_IMG)
+        VALUES (FIGURE_SEQ.nextval,#{figurePrice,jdbcType=DOUBLE},#{figureName,jdbcType=VARCHAR},#{figureImg,jdbcType=VARCHAR})
+    </insert>
+
+    <delete id="deleteFigureById" parameterType="int">
+        delete from FIGURE where FIGURE_ID = #{id}
+    </delete>
+</mapper>

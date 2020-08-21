@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lanqiao.mapper.CinemaMapper">
+
+    <resultMap id="baseResultMap" type="Cinema">
+        <id property="cinemaId" column="CINEMA_ID"/>
+        <result property="name" column="NAME"/>
+        <result property="address" column="ADDRESS"/>
+        <result property="description" column="DESCRIPTION"/>
+        <result property="tel" column="TEL"/>
+        <result property="pic" column="PIC"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="baseResultMap" parameterType="Cinema">
+        select CINEMA_ID,NAME,ADDRESS,DESCRIPTION,TEL,PIC from CINEMA
+        <where>
+            <if test="c.name != null and c.name.trim().length()>0">
+                <bind name="likeName" value="'%' + c.name +'%'"/>
+                AND name like #{likeName}
+            </if>
+            <if test="c.address != null and c.address.trim().length()>0">
+                <bind name="likeAddress" value="'%' + c.address +'%'"/>
+                AND name like #{likeAddress}
+            </if>
+        </where>
+    </select>
+
+    <select id="findCinemaById" parameterType="int" resultMap="baseResultMap">
+        select CINEMA_ID,NAME,ADDRESS,DESCRIPTION,TEL,PIC from CINEMA where CINEMA_ID = #{id}
+    </select>
+
+    <!-- update by id -->
+    <update id="updateCinema" parameterType="Cinema">
+        update CINEMA
+        <set>
+            <if test="name != null and name.trim().length()>0">NAME = #{name},</if>
+            <if test="address != null and address.trim().length()>0">ADDRESS = #{address},</if>
+            <if test="tel != null and tel.trim().length()>0">TEL = #{tel},</if>
+            <if test="pic != null and pic.trim().length()>0">PIC = #{pic},</if>
+        </set>
+        where CINEMA_ID = #{cinemaId}
+    </update>
+
+    <insert id="insertCinema" parameterType="Cinema">
+        insert into CINEMA(CINEMA_ID, NAME, ADDRESS, TEL, PIC)
+        values (CINEMA_SEQ.nextval,
+        #{name,jdbcType=VARCHAR},
+        #{address,jdbcType=VARCHAR},
+        #{tel,jdbcType=VARCHAR},
+        #{pic,jdbcType=VARCHAR})
+    </insert>
+
+    <!-- find the film which not in this cinema -->
+    <select id="findFilmByCinemaId" parameterType="int" resultMap="com.lanqiao.mapper.FilmMapper.baseResultMap">
+        select FILM_ID,FILM_NAME from FILM where FILM_ID not in (select FILM_ID from FILE_CINEMA where CINEMA_ID = #{id})
+    </select>
+
+    <!-- 上架 -->
+    <insert id="insertFilmIntoCinema">
+        insert into FILE_CINEMA(FILM_ID, CINEMA_ID) values (#{filmId},#{cinemaId})
+    </insert>
+
+    <!-- 查询已上架的电影 -->
+    <select id="findFilmOnShelves" parameterType="int" resultMap="com.lanqiao.mapper.FilmMapper.baseResultMap">
+        select f.FILM_ID,FILM_NAME,SUMMARY,TYPE,TIME,SCORE,WISH,cover  from FILM f where FILM_ID  in (select fc.FILM_ID from FILE_CINEMA fc where CINEMA_ID = #{id})
+    </select>
+
+    <!-- 下架 -->
+    <delete id="delFilmFromCinema">
+        delete from FILE_CINEMA where FILM_ID = #{filmId} and CINEMA_ID = #{cinemaId}
+    </delete>
+</mapper>
